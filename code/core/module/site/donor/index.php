@@ -12,6 +12,7 @@
 		"title" => SITE_NAME.$breadCrumbData['title'],
 		"meta_keyword" => "",
 		"meta_description" => "",
+		"center_dir" => DIR_ACTIVE_THEME."/donor/view_donor.php"
 		"center_dir" => DIR_ACTIVE_THEME."/donor/donor.php"
 	);
 
@@ -32,6 +33,8 @@
 			
 			$listCountries = $objDonor->listCountries();
 			
+			$formCurrencySymbol = "&euro;";
+			$formCurrencyCode = "EUR";
 			$formCurrencySymbol = "&dollar;";
 			$formCurrencyCode = "USD";
 			$formCurrencyToogle = '<ul class="dropdown-menu">';
@@ -76,6 +79,7 @@
 			$formNameFirst = $userData['first_name'];
 			$formNameLast = $userData['last_name'];
 			$donorName = $formNameFirst." ".$formNameLast;
+			$donorAccountNumbers = $userData['uid'];
 			$donorAccountNumbers = "-";
 			
 			$formAddress1 = $userData['mailing_address1'];
@@ -86,6 +90,7 @@
 			$formCountryISO = $userData['mailing_country'];
 			
 			$key = array_search($formCountryISO, array_column($listCountries, 'iso'));
+			$formCountry = $listCountries[$key][name];
 			$formCountry = $listCountries[$key]['name'];
 			
 			if($userData['phone_country'] !== ""){
@@ -329,6 +334,8 @@
 					
 					$id = encryption($id, $_SESSION['salt'], false);
 					
+					//TODO:STRIPE, create new plan and update
+					
 					$newData 						= array();
 					$newData['id']		 			= $id;
 					$newData['amount']				= $formSubscriptionAmount;
@@ -345,9 +352,14 @@
 				
 				if($submitMode == "payment_new"){
 					$formCardCustName = checkParam("payment-cc-customname");
+					$formCardNumber = checkParam("payment-cc-number");
+					$formCardName = checkParam("payment-cc-name");
+					$formCardExpiration = checkParam("payment-cc-expiration");
+					$formCardCVV = checkParam("payment-cc-cvv");
 					$formCardHolderName = checkParam("payment-cc-name");
 					$formStripeToken = checkParam("stripeToken");
 					
+					//TODO:STRIPE, create card object
 					
 					/** Stripe Card - Start **/							
 					try{
@@ -387,6 +399,11 @@
 					$data 						= array();
 					$data['user_id']		 	= $userData['id'];
 					$data['custom_name']		= $formCardCustName;
+					$data['name']				= $formCardName;
+					$data['type']				= "card";
+					$data['name_1']				= $formCardExpiration;
+					$data['number']				= $formCardNumber;
+					$data['number_1']			= $formCardCVV;
 					$data['name']				= $formCardHolderName;
 					$data['stripe_source_id']	= $stripe_card->id;
 					$data['type'] 				= "card";
@@ -396,6 +413,7 @@
 					$data['name_1'] 			= str_pad($stripe_card->exp_month, 2, "0", STR_PAD_LEFT)."/".substr($stripe_card->exp_year, -2);
 					$data['created_by']			= $_SESSION['user_id'];
 					$data['created_date']		= date("Y-m-d H:i:s");
+					
 										
 					if($objDonor->savePaymentMethod($data)){
 						insertAuditTrails('payments', 'new', "", $data);					
@@ -407,14 +425,17 @@
 				if($submitMode == "payment_update"){
 					$id = checkParam("payment-cc-id");
 					$formCardCustName = checkParam("payment-cc-customname");
+					$formCardNumber = checkParam("payment-cc-number");
 					$formCardName = checkParam("payment-cc-name");
 					$formCardExpiration = checkParam("payment-cc-expiration");
+					$formCardCVV = checkParam("payment-cc-cvv");
 					
 					$id = encryption($id, $_SESSION['salt'], false);
 					$exp_date = explode('/', $formCardExpiration);
 					$exp_month = intval($exp_date[0]);
 					$exp_year = intval($exp_date[1]);
 					
+					//TODO:STRIPE, create card object
 					/** Stripe Card - Start **/
 					$paymentData = $objDonor->getPaymentData($id);
 					
@@ -458,6 +479,8 @@
 					$newData['custom_name']			= $formCardCustName;
 					$newData['name']				= $formCardName;
 					$newData['name_1']				= $formCardExpiration;
+					$newData['number']				= $formCardNumber;
+					$newData['number_1']			= $formCardCVV;
 					$newData['modified_by']			= $_SESSION['user_id'];
 					$newData['modified_date']		= date("Y-m-d H:i:s");
 					
