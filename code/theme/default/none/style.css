@@ -338,7 +338,7 @@ ul.nav li.dropdown:hover > ul.dropdown-menu {
 }
 .gift-cvv-tooltip{
 	width: 15px;
-	top: 10px;
+	top: 5px;
 	right: 25px;
 	position: absolute;
 }

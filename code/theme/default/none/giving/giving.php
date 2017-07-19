@@ -531,7 +531,9 @@
 					<div class="col-xs-12">
 						<label class="stripe-info" for="card-element">
 						  Credit or debit card
+						  <img src="<?php echo HTTP_MEDIA; ?>/site-image/tooltip-info.png" class="gift-cvv-tooltip" data-toggle="tooltip" title="<img src='<?php echo HTTP_MEDIA; ?>/site-image/cvv-tooltip.png' width='140'>">
 						</label>
+						
 						<div id="card-element">
 						  <!-- a Stripe Element will be inserted here. -->
 						</div>
